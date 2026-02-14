@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZINE ARCHIVE</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+    color: white;
+    overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+    padding: 25px 10%;
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+}
+
+nav h1 {
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* HERO */
+.hero {
+    text-align: center;
+    padding: 120px 10% 60px 10%;
+}
+
+.hero h2 {
+    font-size: clamp(40px, 6vw, 90px);
+    letter-spacing: 6px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    opacity: 0.6;
+}
+
+/* GRID */
+.grid {
+    padding: 60px 10% 120px 10%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 40px;
+}
+
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 60px 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    transition: 0.4s;
+    text-align: center;
+}
+
+.card:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 0 40px rgba(255,255,255,0.1);
+}
+
+.card h3 {
+    font-size: 28px;
+    margin-bottom: 15px;
+}
+
+.card a {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 25px;
+    background: white;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.card a:hover {
+    background: gray;
+    color: white;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    padding: 60px;
+    opacity: 0.5;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+    <h1>Rath x Soutterain</h1>
+</nav>
+
+<section class="hero">
+    <h2>ARCHIVE</h2>
+    <p>Independent Digital Zine Collection</p>
+</section>
+
+<section class="grid">
+
+    <div class="card">
+        <h3>VOL.01</h3>
+        <p>Theme: Experimental Visual</p>
+        <a href="vol1.html">READ</a>
+    </div>
+
+    <div class="card">
+        <h3>VOL.02</h3>
+        <p>Theme: Urban Narrative</p>
+        <a href="vol2.html">READ</a>
+    </div>
+
+    <div class="card">
+        <h3>VOL.03</h3>
+        <p>Theme: Future Culture</p>
+        <a href="vol3.html">READ</a>
+    </div>
+
+</section>
+
+<footer>
+© 2026 — Your Name
+</footer>
+
+</body>
+</html>
