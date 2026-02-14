@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOL.01</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    background: #0f0f0f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow: hidden;
+}
+
+#flipbook {
+    width: 800px;
+    height: 550px;
+}
+
+#flipbook .page {
+    width: 400px;
+    height: 550px;
+    background-color: white;
+}
+
+#flipbook .page img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+    text-decoration: none;
+}
+</style>
+</head>
+
+<body>
+
+<a class="back" href="index.html">← Back</a>
+
+<div id="flipbook">
+    <div class="page"><img src="assets/pages/1.jpg"></div>
+    <div class="page"><img src="assets/pages/2.jpg"></div>
+    <div class="page"><img src="assets/pages/3.jpg"></div>
+    <div class="page"><img src="assets/pages/4.jpg"></div>
+</div>
+
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Turn.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+<script>
+$("#flipbook").turn({
+    width: 800,
+    height: 550,
+    autoCenter: true
+});
+</script>
+
+</body>
+</html>
