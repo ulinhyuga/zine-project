@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rath x Soutterain</title>
+
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+</script>
+
+<!-- Turn.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+
+<style>
+html{ scroll-behavior:smooth; }
+
+body{
+margin:0;
+background:#000;
+color:white;
+font-family:Arial, sans-serif;
+}
+
+/* NAVBAR */
+nav{
+position:fixed;
+top:0;
+width:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:18px 0;
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(15px);
+border-bottom:1px solid rgba(255,255,255,0.06);
+z-index:1000;
+}
+
+.nav-container{
+width:80%;
+max-width:1100px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.brand{
+font-weight:700;
+letter-spacing:1px;
+font-size:15px;
+}
+
+.menu a{
+margin-left:20px;
+text-decoration:none;
+color:white;
+font-size:13px;
+opacity:0.7;
+transition:0.3s;
+}
+.menu a:hover{ opacity:1; }
+
+/* HERO */
+.hero{
+padding-top:110px;
+text-align:center;
+}
+.hero h1{
+font-size:28px;
+letter-spacing:4px;
+font-weight:600;
+}
+
+/* GLASS */
+.glass{
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:20px;
+padding:40px;
+margin:40px auto;
+width:85%;
+max-width:500px;
+animation:fadeUp 0.8s ease;
+}
+@keyframes fadeUp{
+from{opacity:0; transform:translateY(30px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* ZINE */
+.zine{ text-align:center; }
+.zine img{
+width:220px;
+aspect-ratio: 1 / 1.414;
+object-fit:cover;
+border-radius:12px;
+cursor:pointer;
+transition:0.4s;
+}
+.zine img:hover{ transform:scale(1.05); }
+.zine p{
+font-size:13px;
+margin-top:15px;
+letter-spacing:2px;
+opacity:0.7;
+}
+
+/* FLIPBOOK */
+#flipbook-container{
+display:none;
+position:fixed;
+inset:0;
+background:#000;
+justify-content:center;
+align-items:center;
+z-index:2000;
+}
+
+#flipbook{ margin:auto; }
+
+
+#flipbook .page{
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* === FIX AGAR PDF TIDAK TERPOTONG === */
+#flipbook canvas{
+  max-width:100%;
+  max-height:100%;
+}
+.close-btn{
+position:absolute;
+top:30px;
+right:30px;
+font-size:12px;
+cursor:pointer;
+letter-spacing:2px;
+opacity:0.6;
+}
+
+footer{
+text-align:center;
+padding:50px 0;
+font-size:11px;
+opacity:0.4;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="nav-container">
+<div class="brand">RATH X SOUTTERAIN</div>
+<div class="menu">
+<a href="#zine">ZINE</a>
+<a href="#about">ABOUT</a>
+</div>
+</div>
+</nav>
+
+<div class="hero">
+<h1>MAGAZINE</h1>
+</div>
+
+<section id="zine">
+<div class="glass">
+<div class="zine">
+<img src="cover1.jpg" onclick="openFlipbook('zine1.pdf')">
+<p>VOL. 1</p>
+</div>
+</div>
+
+<div class="glass">
+<div class="zine">
+<img src="cover2.jpg" onclick="openFlipbook('zine2.pdf')">
+<p>VOL. 2</p>
+</div>
+</div>
+</section>
+
+<section id="about">
+<div class="glass">
+<h2 style="letter-spacing:2px;">ABOUT</h2>
+<p style="opacity:0.7; font-size:14px;">
+Rath x Soutterain adalah arsip digital zine independen.
+Eksplorasi visual dan teks dalam format flipbook digital.
+</p>
+</div>
+</section>
+
+<footer>
+Copyright © Rath x Soutterain
+</footer>
+
+<div id="flipbook-container">
+<div class="close-btn" onclick="closeFlipbook()">CLOSE</div>
+<div id="flipbook"></div>
+</div>
+
+<script>
+function openFlipbook(pdfUrl){
+
+document.getElementById("flipbook-container").style.display="flex";
+const flipbook = document.getElementById("flipbook");
+flipbook.innerHTML="";
+
+pdfjsLib.getDocument(pdfUrl).promise.then(pdf=>{
+
+let total = pdf.numPages;
+let loaded = 0;
+
+for(let i=1;i<=total;i++){
+pdf.getPage(i).then(page=>{
+
+const viewport = page.getViewport({ scale: 2 });
+const canvas = document.createElement("canvas");
+const context = canvas.getContext("2d");
+
+canvas.width = viewport.width;
+canvas.height = viewport.height;
+
+page.render({
+canvasContext:context,
+viewport:viewport
+}).promise.then(()=>{
+
+const div = document.createElement("div");
+div.className = "page";
+div.appendChild(canvas);
+flipbook.appendChild(div);
+loaded++;
+
+if(loaded === total){
+
+let isMobile = window.innerWidth <= 768;
+let ratio = 1.414;
+
+let pageWidth = isMobile
+  ? window.innerWidth * 0.9
+  : 500;
+
+let pageHeight = pageWidth * ratio;
+
+$("#flipbook").turn({
+width: isMobile ? pageWidth : pageWidth * 2,
+height: pageHeight,
+autoCenter: true,
+display: isMobile ? "single" : "double",
+elevation: 150,
+gradients: true,
+duration: 1200
+});
+
+}
+
+});
+});
+}
+});
+}
+
+function closeFlipbook(){
+if($("#flipbook").data("turn")){
+$("#flipbook").turn("destroy");
+}
+document.getElementById("flipbook-container").style.display="none";
+document.getElementById("flipbook").innerHTML="";
+}
+</script>
+
+</body>
+</html>
