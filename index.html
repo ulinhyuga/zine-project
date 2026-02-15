@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rath x Souterrain</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+html{scroll-behavior:smooth;}
+body{background:linear-gradient(135deg,#000,#0a0a0a);color:#fff;}
+
+/* HEADER */
+header{
+position:sticky;top:0;
+backdrop-filter:blur(10px);
+background:rgba(0,0,0,0.6);
+display:flex;justify-content:space-between;
+align-items:center;padding:20px 40px;
+}
+
+.logo{font-weight:800;letter-spacing:3px;font-size:13px;}
+
+nav a{
+color:#777;text-decoration:none;
+margin-left:20px;font-size:13px;
+transition:0.3s;
+}
+nav a:hover{color:#fff;}
+
+/* HERO */
+.hero{text-align:center;padding:100px 20px 60px;}
+.hero h1{
+font-size:clamp(40px,10vw,80px);
+font-weight:800;
+letter-spacing:-2px;
+opacity:0;
+animation:fadeIn 1.5s ease forwards;
+}
+@keyframes fadeIn{to{opacity:1;}}
+
+/* SECTION */
+.section{padding:50px 40px;}
+.section h2{
+font-size:13px;letter-spacing:3px;
+margin-bottom:30px;color:#aaa;
+}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:30px;
+}
+
+/* CARD GLASS */
+.card{
+padding:18px;border-radius:18px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(15px);
+border:1px solid rgba(255,255,255,0.1);
+transition:0.4s ease;cursor:pointer;
+}
+.card:hover{
+transform:translateY(-6px);
+background:rgba(255,255,255,0.08);
+}
+
+.card img{
+width:100%;border-radius:8px;
+margin-bottom:12px;
+filter:grayscale(100%);
+transition:0.4s ease;
+}
+.card:hover img{
+filter:grayscale(0%);
+transform:scale(1.03);
+}
+
+.card h3{font-size:14px;font-weight:500;}
+.card p{font-size:12px;color:#ccc;margin-top:4px;}
+
+/* ABOUT */
+.about{
+margin:70px 40px 30px;
+padding:40px;border-radius:18px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,0.1);
+}
+.about p{
+max-width:600px;color:#ccc;
+line-height:1.6;font-size:13px;
+}
+
+/* FOOTER */
+.footer{
+text-align:center;
+padding:20px;
+font-size:12px;
+color:#666;
+}
+
+/* FLIPBOOK */
+#flipbookModal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.75);
+backdrop-filter:blur(12px);
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:999;
+}
+
+#flipbook{
+width:90vw;
+max-width:800px;
+height:70vh;
+border-radius:20px;
+overflow:hidden;
+}
+
+.closeBtn{
+margin-top:20px;
+background:rgba(255,255,255,0.1);
+border:1px solid rgba(255,255,255,0.2);
+color:#fff;
+padding:8px 20px;
+border-radius:30px;
+cursor:pointer;
+transition:0.3s;
+}
+.closeBtn:hover{
+background:#fff;color:#000;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">RATH x SOUTERRAIN</div>
+<nav>
+<a href="#zines">Zine</a>
+<a href="#about">About</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>MAGAZINE</h1>
+</section>
+
+<section class="section" id="zines">
+<h2>ZINES</h2>
+
+<div class="grid">
+
+<div class="card" onclick="openFlipbook('zine1.pdf')">
+<img src="cover1.jpg">
+<h3>Zine Vol.1</h3>
+<p>Underground archive</p>
+</div>
+
+<div class="card" onclick="openFlipbook('zine2.pdf')">
+<img src="cover2.jpg">
+<h3>Zine Vol.2</h3>
+<p>Experimental edition</p>
+</div>
+
+</div>
+</section>
+
+<section class="about" id="about">
+<h2>ABOUT</h2>
+<p>
+Rath x Souterrain adalah ruang arsip zine independen.
+Dokumentasi visual bawah tanah dalam format digital flipbook.
+Minimal. Hitam. Sunyi.
+</p>
+</section>
+
+<div class="footer">
+© 2026 Copyright by Rath x Soutterain
+</div>
+
+<div id="flipbookModal">
+<div id="flipbook"></div>
+<button class="closeBtn" onclick="closeFlipbook()">CLOSE</button>
+</div>
+
+<script>
+function openFlipbook(pdfUrl){
+document.getElementById("flipbookModal").style.display="flex";
+const flipbook=$("#flipbook");
+flipbook.html("");
+
+const loadingTask=pdfjsLib.getDocument(pdfUrl);
+
+loadingTask.promise.then(function(pdf){
+let loaded=0;
+
+for(let pageNum=1;pageNum<=pdf.numPages;pageNum++){
+pdf.getPage(pageNum).then(function(page){
+
+const scale=1.2;
+const viewport=page.getViewport({scale:scale});
+
+const canvas=document.createElement("canvas");
+const context=canvas.getContext("2d");
+
+canvas.height=viewport.height;
+canvas.width=viewport.width;
+
+page.render({
+canvasContext:context,
+viewport:viewport
+});
+
+flipbook.append(canvas);
+loaded++;
+
+if(loaded===pdf.numPages){
+flipbook.turn({
+width:$("#flipbook").width(),
+height:$("#flipbook").height(),
+autoCenter:true
+});
+}
+});
+}
+});
+}
+
+function closeFlipbook(){
+document.getElementById("flipbookModal").style.display="none";
+if($("#flipbook").data("turn")){
+$("#flipbook").turn("destroy").html("");
+}
+}
+</script>
+
+</body>
+</html>
