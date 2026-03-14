@@ -3,31 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIY Cassette J-Card Generator</title>
 
-<title>DIY Cassette Cover Generator</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Oswald&family=Courier+Prime&family=Montserrat&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Oswald&family=Courier+Prime&display=swap" rel="stylesheet">
 
 <style>
 
 body{
-background:#111;
+background:#0f0f0f;
 color:white;
 font-family:Montserrat;
-padding:40px;
 text-align:center;
-}
-
-h1{
-margin-bottom:20px;
+padding:40px;
 }
 
 .controls{
-margin-bottom:30px;
 display:flex;
 flex-wrap:wrap;
 gap:10px;
 justify-content:center;
+margin-bottom:25px;
 }
 
 input, textarea, select{
@@ -37,65 +32,8 @@ border:none;
 }
 
 textarea{
-height:80px;
-width:200px;
-}
-
-#coverLayout{
-display:flex;
-margin:auto;
-width:2550px;
-height:600px;
-border:2px solid #444;
-background:#222;
-position:relative;
-}
-
-.section{
-position:relative;
-border-right:2px dashed #666;
-overflow:hidden;
-}
-
-.back{
-width:1200px;
-}
-
-.spine{
-width:150px;
-display:flex;
-align-items:center;
-justify-content:center;
-writing-mode:vertical-rl;
-text-orientation:mixed;
-font-weight:bold;
-font-size:22px;
-border-right:2px dashed #666;
-}
-
-.front{
-width:1200px;
-}
-
-.section img{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
-.textOverlay{
-position:absolute;
-left:20px;
-bottom:20px;
-}
-
-.tracklist{
-position:absolute;
-left:20px;
-top:20px;
-text-align:left;
-font-size:18px;
-white-space:pre-line;
+width:220px;
+height:90px;
 }
 
 button{
@@ -103,12 +41,112 @@ padding:10px 20px;
 border:none;
 border-radius:8px;
 background:white;
-font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-background:#ddd;
+/* ===== J CARD CANVAS ===== /
+
+#jcard{
+
+width:1747px;
+height:1100px;
+
+display:grid;
+grid-template-columns:
+144px
+763px
+90px
+750px;
+
+margin:auto;
+position:relative;
+
+background:#222;
+border:3px solid #aaa;
+
+}
+
+/ panel /
+
+.panel{
+position:relative;
+overflow:hidden;
+border-right:2px dashed #777;
+}
+
+.panel img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/ text /
+
+#frontText{
+
+position:absolute;
+bottom:40px;
+left:40px;
+font-size:48px;
+
+}
+
+#trackText{
+
+position:absolute;
+top:40px;
+left:40px;
+font-size:30px;
+white-space:pre-line;
+text-align:left;
+
+}
+
+#spineText{
+
+writing-mode:vertical-rl;
+text-orientation:mixed;
+
+font-size:40px;
+font-weight:bold;
+
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+
+}
+
+/ guides /
+
+.fold{
+
+position:absolute;
+top:0;
+bottom:0;
+width:3px;
+background:yellow;
+opacity:.7;
+
+}
+
+.cut{
+
+position:absolute;
+left:0;
+right:0;
+height:3px;
+background:red;
+opacity:.6;
+
+}
+
+.topCut{
+top:-3px;
+}
+
+.bottomCut{
+bottom:-3px;
 }
 
 </style>
@@ -116,21 +154,17 @@ background:#ddd;
 
 <body>
 
-<h1>Cassette Cover Generator</h1>
+<h2>DIY Cassette J-Card Generator</h2>
 
 <div class="controls">
 
-<label>Front Cover
 <input type="file" id="frontUpload">
-</label>
-
-<label>Back Cover
 <input type="file" id="backUpload">
-</label>
+<input type="file" id="insideUpload">
 
-<input id="bandName" placeholder="Band Name">
+<input type="text" id="bandName" placeholder="Band Name">
 
-<textarea id="tracks" placeholder="Tracklist"></textarea>
+<textarea id="tracklist" placeholder="Tracklist"></textarea>
 
 <select id="fontSelect">
 <option value="Montserrat">Montserrat</option>
@@ -140,24 +174,33 @@ background:#ddd;
 
 <input type="color" id="fontColor" value="#ffffff">
 
-<button onclick="downloadPNG()">Download PNG</button>
+<button id="downloadBtn">Download PNG</button>
 
 </div>
 
-<div id="coverLayout">
+<div id="jcard">
 
-<div class="section back">
-<img id="backImg">
-<div class="tracklist" id="trackText"></div>
+<div class="cut topCut"></div>
+<div class="cut bottomCut"></div>
+
+<div class="panel flap"></div>
+
+<div class="panel inside">
+<img id="insideImg">
 </div>
 
-<div class="section spine">
-<div id="spineText">Band Name</div>
+<div class="panel spine">
+<div id="spineText">Band</div>
 </div>
 
-<div class="section front">
+<div class="panel front">
 <img id="frontImg">
-<div class="textOverlay" id="frontText">Band Name</div>
+<div id="frontText">Band</div>
+</div>
+
+<div class="panel back">
+<img id="backImg">
+<div id="trackText"></div>
 </div>
 
 </div>
@@ -166,45 +209,42 @@ background:#ddd;
 
 <script>
 
-let frontUpload = document.getElementById("frontUpload")
-let backUpload = document.getElementById("backUpload")
+/ upload image /
 
-let frontImg = document.getElementById("frontImg")
-let backImg = document.getElementById("backImg")
+function upload(input,img){
 
-frontUpload.onchange = e=>{
+input.onchange=e=>{
+
 let reader=new FileReader()
-reader.onload=a=>frontImg.src=a.target.result
+
+reader.onload=a=>img.src=a.target.result
+
 reader.readAsDataURL(e.target.files[0])
+
 }
 
-backUpload.onchange = e=>{
-let reader=new FileReader()
-reader.onload=a=>backImg.src=a.target.result
-reader.readAsDataURL(e.target.files[0])
 }
 
-let bandInput=document.getElementById("bandName")
-let frontText=document.getElementById("frontText")
-let spineText=document.getElementById("spineText")
+upload(frontUpload,frontImg)
+upload(backUpload,backImg)
+upload(insideUpload,insideImg)
 
-bandInput.oninput=()=>{
-frontText.innerText=bandInput.value
-spineText.innerText=bandInput.value
+/ text edit /
+
+bandName.oninput=()=>{
+
+frontText.innerText=bandName.value
+spineText.innerText=bandName.value
+
 }
 
-let trackInput=document.getElementById("tracks")
-let trackText=document.getElementById("trackText")
+tracklist.oninput=()=>{
 
-trackInput.oninput=()=>{
-trackText.innerText=trackInput.value
+trackText.innerText=tracklist.value
+
 }
 
-let fontSelect=document.getElementById("fontSelect")
-let fontColor=document.getElementById("fontColor")
-
-fontSelect.onchange=applyStyle
-fontColor.onchange=applyStyle
+/ font /
 
 function applyStyle(){
 
@@ -221,13 +261,21 @@ trackText.style.color=color
 
 }
 
-function downloadPNG(){
+fontSelect.onchange=applyStyle
+fontColor.onchange=applyStyle
 
-html2canvas(document.getElementById("coverLayout")).then(canvas=>{
+/ download */
+
+downloadBtn.onclick=()=>{
+
+html2canvas(document.getElementById("jcard")).then(canvas=>{
 
 let link=document.createElement("a")
-link.download="cassette-cover.png"
+
+link.download="cassette-jcard.png"
+
 link.href=canvas.toDataURL()
+
 link.click()
 
 })
