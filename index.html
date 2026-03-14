@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cassette Generator</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, sans-serif;
+}
+
+body{
+background:#050505;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+min-height:100vh;
+}
+
+/* background glow */
+
+body::before{
+content:"";
+position:fixed;
+width:500px;
+height:500px;
+background:radial-gradient(circle,#ff2d55,transparent 70%);
+filter:blur(120px);
+top:-100px;
+left:-100px;
+opacity:0.4;
+}
+
+body::after{
+content:"";
+position:fixed;
+width:500px;
+height:500px;
+background:radial-gradient(circle,#00d4ff,transparent 70%);
+filter:blur(120px);
+bottom:-100px;
+right:-100px;
+opacity:0.4;
+}
+
+/* glass container */
+
+.container{
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(12px);
+border:1px solid rgba(255,255,255,0.15);
+padding:30px;
+border-radius:16px;
+width:500px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,0.6);
+}
+
+h1{
+margin-bottom:20px;
+font-weight:700;
+letter-spacing:1px;
+}
+
+/* glass input */
+
+input{
+width:100%;
+padding:12px;
+border-radius:10px;
+border:1px solid rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.08);
+color:white;
+outline:none;
+margin-bottom:15px;
+}
+
+/* glass buttons */
+
+button{
+padding:12px 20px;
+margin:5px;
+border-radius:12px;
+border:1px solid rgba(255,255,255,0.2);
+background:rgba(255,255,255,0.08);
+color:white;
+cursor:pointer;
+transition:0.3s;
+backdrop-filter:blur(10px);
+}
+
+button:hover{
+background:rgba(255,255,255,0.18);
+transform:translateY(-2px);
+box-shadow:0 6px 20px rgba(0,0,0,0.4);
+}
+
+canvas{
+margin-top:25px;
+background:white;
+border-radius:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎧 Cassette Generator</h1>
+
+<input id="playlist" placeholder="Paste YouTube playlist link">
+
+<button onclick="generate()">Generate Cover</button>
+<button onclick="download()">Download PNG</button>
+
+</div>
+
+<canvas id="canvas" width="1200" height="450"></canvas>
+
+<script>
+
+let tracks=[]
+let cover=""
+
+async function generate(){
+
+let url=document.getElementById("playlist").value
+
+if(!url.includes("list=")){
+alert("Paste YouTube playlist link")
+return
+}
+
+let playlistID=url.split("list=")[1]
+
+let apiKey="YOUR_YOUTUBE_API_KEY"
+
+let res=await fetch(
+`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=25&playlistId=&key=`
+)
+
+let data=await res.json()
+
+tracks=data.items
+cover=tracks[0].snippet.thumbnails.high.url
+
+draw()
+
+}
+
+function draw(){
+
+let canvas=document.getElementById("canvas")
+let ctx=canvas.getContext("2d")
+
+ctx.fillStyle="white"
+ctx.fillRect(0,0,canvas.width,canvas.height)
+
+let img=new Image()
+img.crossOrigin="anonymous"
+
+img.onload=function(){
+
+ctx.drawImage(img,0,0,350,350)
+
+ctx.fillStyle="black"
+ctx.font="bold 24px Arial"
+ctx.fillText("CASSETTE MIX",380,40)
+
+ctx.font="16px Arial"
+
+tracks.slice(0,15).forEach((t,i)=>{
+ctx.fillText(
+(i+1)+". "+t.snippet.title,
+380,
+90+(i*20)
+)
+})
+
+}
+
+img.src=cover
+
+}
+
+function download(){
+
+let canvas=document.getElementById("canvas")
+
+let link=document.createElement("a")
+link.download="cassette_cover.png"
+link.href=canvas.toDataURL()
+
+link.click()
+
+}
+
+</script>
+
+</body>
+</html>
