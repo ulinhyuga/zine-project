@@ -4,56 +4,107 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>VHS Cover Generator</title>
+<title>DIY Cassette Cover Generator</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Oswald&family=Courier+Prime&family=Montserrat&display=swap" rel="stylesheet">
 
 <style>
 
 body{
-background:#0f0f0f;
-font-family:Arial, sans-serif;
+background:#111;
 color:white;
-display:flex;
-flex-direction:column;
-align-items:center;
+font-family:Montserrat;
 padding:40px;
+text-align:center;
 }
 
 h1{
 margin-bottom:20px;
 }
 
-input{
-margin-bottom:20px;
+.controls{
+margin-bottom:30px;
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+justify-content:center;
 }
 
-.preview{
-width:600px;
-height:350px;
+input, textarea, select{
+padding:8px;
+border-radius:6px;
+border:none;
+}
+
+textarea{
+height:80px;
+width:200px;
+}
+
+#coverLayout{
+display:flex;
+margin:auto;
+width:2550px;
+height:600px;
+border:2px solid #444;
 background:#222;
-border-radius:10px;
-overflow:hidden;
 position:relative;
 }
 
-.preview img{
+.section{
+position:relative;
+border-right:2px dashed #666;
+overflow:hidden;
+}
+
+.back{
+width:1200px;
+}
+
+.spine{
+width:150px;
+display:flex;
+align-items:center;
+justify-content:center;
+writing-mode:vertical-rl;
+text-orientation:mixed;
+font-weight:bold;
+font-size:22px;
+border-right:2px dashed #666;
+}
+
+.front{
+width:1200px;
+}
+
+.section img{
 width:100%;
 height:100%;
 object-fit:cover;
 }
 
-.controls{
-margin-top:20px;
-display:flex;
-gap:10px;
+.textOverlay{
+position:absolute;
+left:20px;
+bottom:20px;
+}
+
+.tracklist{
+position:absolute;
+left:20px;
+top:20px;
+text-align:left;
+font-size:18px;
+white-space:pre-line;
 }
 
 button{
 padding:10px 20px;
 border:none;
-border-radius:6px;
-background:#ffffff;
-cursor:pointer;
+border-radius:8px;
+background:white;
 font-weight:bold;
+cursor:pointer;
 }
 
 button:hover{
@@ -65,70 +116,119 @@ background:#ddd;
 
 <body>
 
-<h1>VHS Cover Generator</h1>
-
-<input type="file" id="upload">
-
-<div class="preview" id="preview">
-<img id="cover">
-</div>
+<h1>Cassette Cover Generator</h1>
 
 <div class="controls">
+
+<label>Front Cover
+<input type="file" id="frontUpload">
+</label>
+
+<label>Back Cover
+<input type="file" id="backUpload">
+</label>
+
+<input id="bandName" placeholder="Band Name">
+
+<textarea id="tracks" placeholder="Tracklist"></textarea>
+
+<select id="fontSelect">
+<option value="Montserrat">Montserrat</option>
+<option value="Oswald">Oswald</option>
+<option value="Courier Prime">Courier</option>
+</select>
+
+<input type="color" id="fontColor" value="#ffffff">
+
 <button onclick="downloadPNG()">Download PNG</button>
-<button onclick="downloadPDF()">Download PDF</button>
+
+</div>
+
+<div id="coverLayout">
+
+<div class="section back">
+<img id="backImg">
+<div class="tracklist" id="trackText"></div>
+</div>
+
+<div class="section spine">
+<div id="spineText">Band Name</div>
+</div>
+
+<div class="section front">
+<img id="frontImg">
+<div class="textOverlay" id="frontText">Band Name</div>
+</div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
-let upload = document.getElementById("upload")
-let cover = document.getElementById("cover")
+let frontUpload = document.getElementById("frontUpload")
+let backUpload = document.getElementById("backUpload")
 
-upload.onchange = e =>{
+let frontImg = document.getElementById("frontImg")
+let backImg = document.getElementById("backImg")
 
-let file = e.target.files[0]
-
-let reader = new FileReader()
-
-reader.onload = function(event){
-
-cover.src = event.target.result
-
+frontUpload.onchange = e=>{
+let reader=new FileReader()
+reader.onload=a=>frontImg.src=a.target.result
+reader.readAsDataURL(e.target.files[0])
 }
 
-reader.readAsDataURL(file)
+backUpload.onchange = e=>{
+let reader=new FileReader()
+reader.onload=a=>backImg.src=a.target.result
+reader.readAsDataURL(e.target.files[0])
+}
+
+let bandInput=document.getElementById("bandName")
+let frontText=document.getElementById("frontText")
+let spineText=document.getElementById("spineText")
+
+bandInput.oninput=()=>{
+frontText.innerText=bandInput.value
+spineText.innerText=bandInput.value
+}
+
+let trackInput=document.getElementById("tracks")
+let trackText=document.getElementById("trackText")
+
+trackInput.oninput=()=>{
+trackText.innerText=trackInput.value
+}
+
+let fontSelect=document.getElementById("fontSelect")
+let fontColor=document.getElementById("fontColor")
+
+fontSelect.onchange=applyStyle
+fontColor.onchange=applyStyle
+
+function applyStyle(){
+
+let font=fontSelect.value
+let color=fontColor.value
+
+frontText.style.fontFamily=font
+spineText.style.fontFamily=font
+trackText.style.fontFamily=font
+
+frontText.style.color=color
+spineText.style.color=color
+trackText.style.color=color
 
 }
 
 function downloadPNG(){
 
-html2canvas(document.getElementById("preview")).then(canvas=>{
+html2canvas(document.getElementById("coverLayout")).then(canvas=>{
 
 let link=document.createElement("a")
-
-link.download="vhs-cover.png"
-
+link.download="cassette-cover.png"
 link.href=canvas.toDataURL()
-
 link.click()
-
-})
-
-}
-
-function downloadPDF(){
-
-html2canvas(document.getElementById("preview")).then(canvas=>{
-
-let img=canvas.toDataURL("image/png")
-
-let pdf=new jspdf.jsPDF()
-
-pdf.addImage(img,'PNG',10,10,180,100)
-
-pdf.save("vhs-cover.pdf")
 
 })
 
