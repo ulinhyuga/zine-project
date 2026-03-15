@@ -90,7 +90,30 @@ button{ background:white; color:black; border:none; padding:12px; border-radius:
 }
 
 
-.section{ height:100%; box-sizing:border-box; border-right:2px dashed #444; position:relative; background:var(--backColor); }
+/* Tampilan di Editor (Garis Putus-putus) */
+.section { 
+    height: 100%; 
+    box-sizing: border-box; 
+    border-right: 2px dashed #444; 
+    position: relative; 
+    background: var(--backColor);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    /* Menjaga kualitas gambar tetap tajam saat scaling */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* Tampilan saat Simpan/Export (Garis Solid Tipis HD) */
+.exporting .section {
+    border-right: 1px solid #cccccc !important;
+}
+
+/* Menghilangkan garis di ujung paling kanan agar tidak kotor */
+.exporting .front-cover {
+    border-right: none !important;
+}
 .back-flap{ width:254px; padding:40px 20px; }
 .spine{ width:127px; display:flex; justify-content:center; align-items:center; }
 .front-cover{ width:650px; background-size:cover; background-position:center; display:flex; align-items:center; padding-left:30px; }
@@ -402,26 +425,34 @@ document.querySelectorAll('.transform-box').forEach(box => {
 });
 
 function downloadJPG(){
-    // Aktifkan mode ekspor (mengubah garis jadi solid)
+    // Tambahkan class exporting untuk garis solid
     canvas.classList.add('exporting');
     
-    // Beri jeda 100ms agar browser merender perubahan garis sebelum difoto
+    // Gunakan opsi resolusi tinggi
+    const options = {
+        scale: 4,            // Menaikkan resolusi 4x lipat (HD)
+        useCORS: true,       // Memastikan gambar dari link luar tetap terbawa
+        allowTaint: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 1031,   // Mengunci lebar asli canvas
+        windowHeight: 1020,  // Mengunci tinggi asli canvas
+        backgroundColor: null // Menghindari background hitam tak diinginkan
+    };
+
     setTimeout(() => {
-        html2canvas(canvas, {
-            scale: 3, 
-            useCORS: true,
-            logging: false
-        }).then(c => {
+        html2canvas(canvas, options).then(c => {
             const l = document.createElement("a");
-            l.download = "jcard-kaset.jpg";
-            l.href = c.toDataURL("image/jpeg", 0.9);
+            l.download = "jcard-hd-print.jpg";
+            // Kualitas 1.0 berarti tanpa kompresi (Maksimal)
+            l.href = c.toDataURL("image/jpeg", 1.0); 
             l.click();
             
-            // Kembalikan ke garis putus-putus setelah selesai
             canvas.classList.remove('exporting');
         });
-    }, 100);
+    }, 200);
 }
+
 
 function downloadPDF(){
     canvas.classList.add('exporting');
